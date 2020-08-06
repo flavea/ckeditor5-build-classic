@@ -1,3 +1,4 @@
+
 /**
  * @license Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license
@@ -37,7 +38,44 @@ import Highlight from '@ckeditor/ckeditor5-highlight/src/highlight';
 import HorizontalLine from '@ckeditor/ckeditor5-horizontal-line/src/horizontalline';
 import RemoveFormat from '@ckeditor/ckeditor5-remove-format/src/removeformat';
 import Alignment from '@ckeditor/ckeditor5-alignment/src/alignment';
-import ImageViaUrlEmbed from '@ckeditor/image-via-url/src/imageviaurlembed';
+import LinkImage from '@ckeditor/ckeditor5-link/src/linkimage';
+
+import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
+import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
+
+import imageIcon from '@ckeditor/ckeditor5-core/theme/icons/image.svg';
+
+class InsertImage extends Plugin {
+	init() {
+		const editor = this.editor;
+
+		editor.ui.componentFactory.add( 'insertImage', locale => {
+			const view = new ButtonView( locale );
+
+			view.set( {
+				label: 'Insert image',
+				icon: imageIcon,
+				tooltip: true
+			} );
+
+			// Callback executed once the image is clicked.
+			view.on( 'execute', () => {
+				const imageUrl = prompt( 'Image URL' );
+
+				editor.model.change( writer => {
+					const imageElement = writer.createElement( 'image', {
+						src: imageUrl
+					} );
+
+					// Insert the image in the current selection location.
+					editor.model.insertContent( imageElement, editor.model.document.selection );
+				} );
+			} );
+
+			return view;
+		} );
+	}
+}
 
 export default class ClassicEditor extends ClassicEditorBase {}
 
@@ -60,6 +98,7 @@ ClassicEditor.builtinPlugins = [
 	ImageCaption,
 	ImageStyle,
 	ImageToolbar,
+	InsertImage,
 	Indent,
 	Link,
 	List,
@@ -74,7 +113,7 @@ ClassicEditor.builtinPlugins = [
 	HorizontalLine,
 	RemoveFormat,
 	Alignment,
-	ImageViaUrlEmbed
+	LinkImage
 ];
 
 // Editor configuration.
@@ -98,7 +137,7 @@ ClassicEditor.defaultConfig = {
 			'blockQuote',
 			'|',
 			'insertTable',
-			'imageViaUrlEmbed',
+			'insertImage',
 			'mediaEmbed',
 			'undo',
 			'redo',
@@ -107,7 +146,7 @@ ClassicEditor.defaultConfig = {
 			'superscript',
 			'highlight',
 			'code',
-			'codeBlock',
+			'codeBlock'
 		]
 	},
 	image: {
@@ -115,7 +154,8 @@ ClassicEditor.defaultConfig = {
 			'imageStyle:full',
 			'imageStyle:side',
 			'|',
-			'imageTextAlternative'
+			'imageTextAlternative',
+			'linkImage'
 		]
 	},
 	table: {
@@ -190,7 +230,7 @@ ClassicEditor.defaultConfig = {
 			title: 'Blue marker',
 			color: '#1FD7FF',
 			type: 'marker'
-		},
+		}
 
 		]
 	},
